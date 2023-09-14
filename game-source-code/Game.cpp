@@ -269,3 +269,70 @@ void Game::update()
                 }
             }
         }
+
+         // Check for collision between player and landers
+        for (size_t i = 0; i < landers.size(); i++)
+        {
+            if (!landers[i].isDestroyed() && player.getGlobalBounds().intersects(landers[i].landerSprite.getGlobalBounds()))
+            {
+                isGameOver = true;
+                break;
+            }
+        }
+
+        // Check for collision between player and missiles
+        for (size_t i = 0; i < missiles.size(); i++)
+        {
+            if (missiles[i].shape.getGlobalBounds().intersects(player.getGlobalBounds()))
+            {
+                isGameOver = true;
+                break;
+            }
+        }
+    }
+}
+
+void Game::render(sf::RenderWindow &window) // Rendering the game shapes and sprites
+{
+    window.clear();
+    window.draw(backgroundSprite);
+    player.render(window);
+
+    window.draw(player);
+
+    // Draw Landers using the render function from Lander
+    for (auto &lander : landers)
+    {
+        if (!lander.isDestroyed())
+        {
+            lander.render(window);
+        }
+    }
+
+    // Draw Missiles
+    for (const auto &missile : missiles)
+    {
+        window.draw(missile.shape);
+    }
+
+    // Draw Lasers
+    for (const auto &laser : lasers)
+    {
+        window.draw(laser.shape);
+    }
+
+    // Display and update the score
+    sf::Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setCharacterSize(24);
+    scoreText.setFillColor(sf::Color::White);
+    scoreText.setPosition(10, 10);
+    scoreText.setString("Score: " + std::to_string(score)); // Display the score
+
+    // Create a text object for the high score
+    sf::Text highScoreText;
+    highScoreText.setFont(font);
+    highScoreText.setCharacterSize(24);
+    highScoreText.setFillColor(sf::Color::White);
+    highScoreText.setPosition(10, 40); // Adjust the vertical position for the high score
+    highScoreText.setString("Highscore: " + std::to_string(highScore));
