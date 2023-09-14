@@ -84,3 +84,94 @@ void Game::handleInput(sf::RenderWindow &window)
             isPauseScreenVisible = true;
         }
     }
+
+ else if (isPauseScreenVisible)
+    {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y))
+        {
+            isPauseScreenVisible = false;
+            gameStarted = false;
+            if (score > highScore)
+            {
+                highScore = score; // Save the highscore
+            }
+            score = 0;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N))
+        {
+            isPauseScreenVisible = false;
+        }
+    }
+    // Handle input for game over screen
+    else if (isWinScreenVisible)
+    {
+        gameStarted = false;
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) // Continue the next level
+        {
+            isWinScreenVisible = false;
+            gameStarted = true;
+            level++;
+            previousLevelScore = score;
+            gameStarted = true;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N)) // Restart a new game
+
+        {
+            isWinScreenVisible = false;
+            isSplashScreenVisible = true;
+            resetGame();
+            score = 0;
+            previousLevelScore = 0;
+            level = 1;
+        }
+    }
+    else if (isGameOver)
+    {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y))
+        {
+            isGameOver = false;
+            gameStarted = true;
+            isSplashScreenVisible = false;
+            if (score > highScore)
+            {
+                highScore = score;
+            }
+            score = 0;
+            previousLevelScore = 0;
+            level = 1;
+            resetGame();
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N))
+        {
+            gameStarted = false;
+            isSplashScreenVisible = true;
+            resetGame();
+            window.close();
+        }
+    }
+
+    while (window.pollEvent(event))
+    {
+        if (event.type == sf::Event::Closed)
+        {
+            window.close();
+        }
+
+        if (event.type == sf::Event::MouseButtonPressed)
+        {
+
+            if (event.mouseButton.button == sf::Mouse::Left)
+            {
+
+                Laser laser;
+                laser.shape.setSize(sf::Vector2f(5, 20));
+                laser.shape.setFillColor(sf::Color::Cyan);
+                laser.shape.setPosition(player.getPosition().x + 22, player.getPosition().y);
+                laser.velocity.x = (mousePosition.x > playerCenter.x) ? LASER_SPEED : -LASER_SPEED;
+
+                laser.setFired(true);
+                lasers.push_back(laser);
+            }
+        }
+    }
