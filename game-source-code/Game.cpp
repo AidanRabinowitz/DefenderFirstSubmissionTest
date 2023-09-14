@@ -270,7 +270,7 @@ void Game::update()
             }
         }
 
-         // Check for collision between player and landers
+        // Check for collision between player and landers
         for (size_t i = 0; i < landers.size(); i++)
         {
             if (!landers[i].isDestroyed() && player.getGlobalBounds().intersects(landers[i].landerSprite.getGlobalBounds()))
@@ -336,3 +336,67 @@ void Game::render(sf::RenderWindow &window) // Rendering the game shapes and spr
     highScoreText.setFillColor(sf::Color::White);
     highScoreText.setPosition(10, 40); // Adjust the vertical position for the high score
     highScoreText.setString("Highscore: " + std::to_string(highScore));
+
+    window.draw(scoreText);
+    window.draw(highScoreText);
+
+    // Display the splash screen
+    if (!gameStarted && !isPauseScreenVisible && !isGameOver && !isWinScreenVisible)
+    {
+        sf::Text splashText;
+        splashText.setFont(font);
+        splashText.setCharacterSize(32);
+        splashText.setFillColor(sf::Color::White);
+        splashText.setPosition(200, 200);
+        splashText.setString("Press Space to Start \n "
+                             " \n WASD keys to move \n "
+                             " \n Left mouseclick to fire  \n "
+                             " \n Hover mouse left or right of \n "
+                             " \n player to change direction \n "
+                             " \n esc to pause \n");
+
+        window.draw(splashText);
+        window.draw(highScoreText);
+    }
+
+    // Display the pause screen
+    if (isPauseScreenVisible)
+    {
+        sf::Text pauseText;
+        pauseText.setFont(font);
+        pauseText.setCharacterSize(32);
+        pauseText.setFillColor(sf::Color::White);
+        pauseText.setPosition(200, 200);
+        pauseText.setString("Are you sure you want to quit?\nY for yes, N for no");
+
+        window.draw(pauseText);
+    }
+    if (isWinScreenVisible)
+    {
+        sf::Text winText;
+        winText.setFont(font);
+        winText.setCharacterSize(32);
+        winText.setFillColor(sf::Color::White);
+        winText.setPosition(200, 200);
+        winText.setString("You killed 10 landers! YOU WIN!\nProceed to level " + std::to_string(level + 1) + "?\nY for yes, N for no");
+
+        window.draw(winText);
+    }
+
+    // Display the game over screen
+    if (isGameOver)
+    {
+        sf::Text gameOverText;
+        gameOverText.setFont(font);
+        gameOverText.setCharacterSize(32);
+        gameOverText.setFillColor(sf::Color::Red);
+        gameOverText.setPosition(200, 200);
+        gameOverText.setString("You Died\nPlay again?\nY for yes, N to close the window");
+
+        window.draw(gameOverText);
+        resetGame();
+    }
+
+    // Display everything on the window
+    window.display();
+}
