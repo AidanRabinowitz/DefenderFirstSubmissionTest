@@ -85,7 +85,7 @@ void Game::handleInput(sf::RenderWindow &window)
         }
     }
 
- else if (isPauseScreenVisible)
+    else if (isPauseScreenVisible)
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y))
         {
@@ -175,3 +175,97 @@ void Game::handleInput(sf::RenderWindow &window)
             }
         }
     }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && player.getPosition().x > 0)
+    {
+        player.move(-PLAYER_SPEED, 0);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && player.getPosition().x < WINDOW_WIDTH - 50)
+    {
+        player.move(PLAYER_SPEED, 0);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && player.getPosition().y > 0)
+    {
+        player.move(0, -PLAYER_SPEED);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && player.getPosition().y < WINDOW_HEIGHT - 50)
+    {
+        player.move(0, PLAYER_SPEED);
+    }
+}
+
+void Game::update()
+{
+    if (gameStarted && !isPauseScreenVisible && !isGameOver)
+    {
+        if (spawnTimer.getElapsedTime().asMilliseconds() > SPAWN_INTERVAL) // Spawn Landers
+        {
+            Lander newLander;
+
+            // Set the lander's position to a random location along the X-axis
+            float xPos = static_cast<float>(rand() % static_cast<int>(WINDOW_WIDTH - newLander.landerSprite.getGlobalBounds().width));
+            newLander.landerSprite.setPosition(sf::Vector2f(xPos, -newLander.landerSprite.getGlobalBounds().height));
+            newLander.landerSprite.setTexture(landerTexture);
+            landers.push_back(newLander);
+            spawnTimer.restart();
+        }
+        // Fire Missiles from Landers towards the player's ship after the desired interval
+        for (size_t i = 0; i < landers.size(); i++)
+        {
+            if (missileTimer.getElapsedTime().asMilliseconds() > MISSILE_INTERVAL)
+            {
+                for (size_t i = 0; i < landers.size(); i++)
+                {
+                    if (!landers[i].isDestroyed())
+                    {
+                        missiles.push_back(Missile(landers[i].getPosition(), player.getPosition()));
+                    }
+                }
+                missileTimer.restart();
+            }
+        }
+
+        for (size_t i = 0; i < landers.size(); i++)
+        {
+            if (!landers[i].isDestroyed())
+            {
+                landers[i].landerSprite.move(0, LANDER_SPEED); // Move downward
+            }
+
+            // Remove Landers that go out of bounds
+            if (landers[i].landerSprite.getPosition().y > WINDOW_HEIGHT)
+            {
+                landers.erase(landers.begin() + i);
+                i--;
+                missiles.erase(missiles.begin() + i);
+                i--;
+            }
+        }
+
+        // Move and draw missiles
+        for (size_t i = 0; i < missiles.size(); i++)
+        {
+            missiles[i].move();
+        }
+
+        // Move Lasers
+        for (size_t i = 0; i < lasers.size(); i++)
+        {
+            lasers[i].shape.move(lasers[i].velocity);
+        }
+
+        // Check for collision between lasers and landers
+        for (size_t i = 0; i < lasers.size(); i++)
+        {
+            for (size_t j = 0; j < landers.size(); j++)
+            {
+                if (!landers[j].isDestroyed() && lasers[i].shape.getGlobalBounds().intersects(landers[j].getSprite().getGlobalBounds()))
+                {
+                    score += 10;
+                    landers[j].destroy();
+                    lasers.erase(lasers.begin() + i);
+                    i--;   // Adjust the index after removal
+                    break; // Exit the inner loop when a collision occurs
+                }
+            }
+        }
